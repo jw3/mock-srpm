@@ -49,7 +49,9 @@ runs:
     - id: build
       run: |
         cid=$(cat action.cid)
-        podman exec $cid mock -r ${{ inputs.chroot }} buildsrpm --spec ${{ inputs.spec }} --sources /in --resultdir /out
+        spec=$(basename ${{ inputs.spec }})
+        podman cp ${{ inputs.spec }} $cid:/tmp/$spec
+        podman exec $cid mock -r ${{ inputs.chroot }} buildsrpm --spec /tmp/$spec --sources /in --resultdir /out
       shell: bash
 
     - id: show-logs
