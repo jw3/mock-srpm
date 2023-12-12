@@ -49,8 +49,6 @@ runs:
     - id: build
       run: |
         cid=$(cat action.cid)
-        srpm=$(basename ${{ inputs.srpm }})
-        podman cp ${{ inputs.srpm }} $cid:/tmp/$srpm
         podman exec $cid mock -r ${{ inputs.chroot }} buildsrpm --spec ${{ inputs.spec }} --sources /in --resultdir /out
       shell: bash
 
