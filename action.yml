@@ -20,11 +20,6 @@ inputs:
     description: Show mock logs
     required: true
     default: /tmp/mock
-  debug:
-    description: Show mock logs
-    required: false
-
-# mock [options] --buildsrpm {--spec spec --sources src | --scm-enable}
 
 runs:
   using: composite
@@ -55,11 +50,4 @@ runs:
         podman exec $cid mock -r ${{ inputs.chroot }} --copyin /in /builddir/build/SOURCES
         podman exec $cid mock -r ${{ inputs.chroot }} --shell rpmbuild -bs /builddir/build/SPECS/$spec
         podman exec $cid mock -r ${{ inputs.chroot }} --copyout /builddir/build/SRPMS/* /out
-      shell: bash
-
-    - id: show-logs
-      if: failure() || ${{ inputs.debug }}
-      run: |
-        ls -R ${{ inputs.result-dir }}
-        cat ${{ inputs.result-dir }}/build.log
       shell: bash
