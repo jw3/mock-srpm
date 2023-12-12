@@ -53,9 +53,8 @@ runs:
       shell: bash
 
     - id: show-logs
-      if: ${{ inputs.debug }}
+      if: failure() || ${{ inputs.debug }}
       run: |
-        cid=$(cat action.cid)
-        podman exec $cid ls -R /tmp/rpmbuild
-        podman exec $cid cat /tmp/rpmbuild/build.log
+        ls -R ${{ inputs.result-dir }}
+        cat ${{ inputs.result-dir }}/build.log
       shell: bash
