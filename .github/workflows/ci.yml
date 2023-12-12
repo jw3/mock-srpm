@@ -22,7 +22,7 @@ jobs:
           spec: test/simple/simple.spec
           debug: true
       - name: Build rpm
-        uses: jw3/mock-rpm@v0
+        uses: ./hack/mock-rpm
         with:
           chroot: fedora-39-x86_64
           srpm: simple-0.0.0.fc39.src.rpm

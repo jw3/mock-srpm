@@ -1,0 +1,56 @@
+name: mock rpm build
+author: John Wass
+description: Action for simple chroot building of RPMs
+branding:
+  icon: package
+  color: red
+
+inputs:
+  chroot:
+    description: Mock chroot id -- see https://github.com/rpm-software-management/mock/tree/main/mock-core-configs/etc/mock
+    required: true
+  srpm:
+    description: Path to the src rpm
+    required: true
+  result-dir:
+    description: Path to write rpmbuild outputs
+    required: true
+    default: /tmp/mock
+  debug:
+    description: Show rpmbuild logs on success (auto on-fail)
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - id: install-podman
+      run: sudo apt install -y podman
+      shell: bash
+
+    - id: create-container
+      run: |
+        mkdir -p ${{ inputs.result-dir }}
+        podman run -dt --privileged -v ${{ inputs.result-dir }}:/v fedora:latest > action.cid
+      shell: bash
+
+    - id: init-mock-env
+      run: |
+        cid=$(cat action.cid)
+        podman exec $cid dnf install -y mock
+        podman exec $cid mock -r ${{ inputs.chroot }} --init
+      shell: bash
+
+    - id: build
+      run: |
+        cid=$(cat action.cid)
+        srpm=$(basename ${{ inputs.srpm }})
+        podman cp ${{ inputs.srpm }} $cid:/tmp/$srpm
+        podman exec $cid mock -r ${{ inputs.chroot }} rebuild /tmp/$srpm --resultdir /v
+      shell: bash
+
+    - id: show-logs
+      if: failure() || ${{ inputs.debug }}
+      run: |
+        ls -R ${{ inputs.result-dir }}
+        cat ${{ inputs.result-dir }}/build.log
+      shell: bash
