@@ -21,18 +21,12 @@ jobs:
           chroot: fedora-39-x86_64
           spec: test/simple/simple.spec
           debug: true
-      - run: ls -alR
-      - name: Checksum artifacts
-        run: sha256sum ./*.src.rpm
       - name: Build rpm
         uses: ./hack/mock-rpm
         with:
           chroot: fedora-39-x86_64
-          srpm: simple-0.0.0-1.fc39.src.rpm
-      - name: Checksum artifacts
-        run: sha256sum /tmp/mock/*
-      - name: Upload rpm
-        uses: actions/upload-artifact@v3
+          srpm: simple-*.src.rpm
+      - uses: actions/upload-artifact@v3
         with:
           name: rpm-artifacts
           path: |
@@ -44,11 +38,9 @@ jobs:
     runs-on: ubuntu-latest
     container: fedora:39
     steps:
-      - name: Download rpm
-        uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v3
         with:
           name: rpm-artifacts
-      - name: Install rpm
-        run: dnf install -y simple-*.x86_64.rpm
+      - run: dnf install -y simple-*.x86_64.rpm
       - name: Test
         run: simple
