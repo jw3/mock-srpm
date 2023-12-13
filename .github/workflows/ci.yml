@@ -28,7 +28,7 @@ jobs:
         uses: ./hack/mock-rpm
         with:
           chroot: fedora-39-x86_64
-          srpm: /tmp/mock/simple-0.0.0-1.fc39.src.rpm
+          srpm: simple-0.0.0-1.fc39.src.rpm
       - name: Checksum artifacts
         run: sha256sum /tmp/mock/*
       - name: Upload rpm
@@ -48,10 +48,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: rpm-artifacts
-          path: /tmp/src
-      - name: Checksum artifacts
-        run: sha256sum /tmp/src/*
       - name: Install rpm
-        run: dnf install -y /tmp/src/simple-0.0.0-1.fc39.x86_64.rpm
+        run: dnf install -y simple-*.rpm
       - name: Test
         run: simple
