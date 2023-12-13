@@ -49,6 +49,6 @@ jobs:
         with:
           name: rpm-artifacts
       - name: Install rpm
-        run: dnf install -y simple-*.rpm
+        run: dnf install -y simple-*.x86_64.rpm
       - name: Test
         run: simple
