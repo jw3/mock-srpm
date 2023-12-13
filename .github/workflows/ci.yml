@@ -21,9 +21,9 @@ jobs:
           chroot: fedora-39-x86_64
           spec: test/simple/simple.spec
           debug: true
-      - run: ls -alR /tmp/mock
+      - run: ls -alR
       - name: Checksum artifacts
-        run: sha256sum /tmp/mock/*
+        run: sha256sum ./*.src.rpm
       - name: Build rpm
         uses: ./hack/mock-rpm
         with:
