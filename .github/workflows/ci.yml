@@ -20,7 +20,6 @@ jobs:
         with:
           chroot: fedora-39-x86_64
           spec: test/simple/simple.spec
-          debug: true
       - name: Build rpm
         uses: ./hack/mock-rpm
         with:
