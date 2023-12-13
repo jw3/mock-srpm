@@ -25,7 +25,7 @@ jobs:
         uses: ./hack/mock-rpm
         with:
           chroot: fedora-39-x86_64
-          srpm: simple-0.0.0.fc39.src.rpm
+          srpm: /tmp/mock/simple-0.0.0.fc39.src.rpm
       - name: Checksum artifacts
         run: sha256sum /tmp/mock/*
       - name: Upload rpm
