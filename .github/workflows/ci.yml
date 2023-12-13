@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rpm:
+    name: Build rpm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build srpm
+        uses: ./
+        with:
+          chroot: fedora-39-x86_64
+          spec: test/simple/simple.spec
+      - name: Build rpm
+        uses: jw3/mock-rpm@v0
+        with:
+          chroot: fedora-39-x86_64
+          srpm: simple-*.src.rpm
+      - uses: actions/upload-artifact@v3
+        with:
+          name: rpm-artifacts
+          path: |
+            /tmp/mock/*.rpm
+
+  it:
+    needs: [ rpm ]
+    name: Integration test rpm
+    runs-on: ubuntu-latest
+    container: fedora:39
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: rpm-artifacts
+      - run: dnf install -y simple-*.x86_64.rpm
+      - name: Test
+        run: simple
