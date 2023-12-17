@@ -1,7 +1,9 @@
 Mock RPM Action
 ===
 
-This GitHub Action provides a friendly interface for building RPMs using Mock.
+This GitHub Action provides a friendly interface for building Source RPMs using Mock.
+
+For building binary RPMs please see the [`jw3/mock-rpm`](https://github.com/jw3/mock-rpm) action.
 
 ## Example workflow
 
