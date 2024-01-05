@@ -36,6 +36,7 @@ runs:
     - id: map-source
       if: inputs.src != null
       run: |
+        ls ${{ github.workspace }}
         src="${{ inputs.src }}"
         if [[ "$src" != /* ]]; then src="${{ github.workspace }}/$src"; fi 
         echo "mapping $src to rpmbuild/SOURCES"
