@@ -13,9 +13,8 @@ inputs:
     description: Path to spec file
     required: true
   src:
-    description: Source file or directory
-    required: true
-    default: .
+    description: Path (file or dir) mapped to the rpmbuild/SOURCES directory
+    required: false
   result-dir:
     description: Show mock logs
     required: true
@@ -28,10 +27,33 @@ runs:
       run: sudo apt install -y podman
       shell: bash
 
-    - id: create-container
+    - id: prep-fs
       run: |
+        touch /tmp/mock-container-args
         mkdir -p ${{ inputs.result-dir }}
-        podman run -dt --privileged -v ${{ inputs.src }}:/in:ro -v ${{ inputs.result-dir }}:/out fedora:latest > action.cid
+      shell: bash
+
+    - id: map-source
+      if: ${{ inputs.src != "" }}
+      run: |
+        src = "${{ inputs.src }}"
+        if [[ "$src" != /* ]]; then src = "./$src"; fi 
+        echo "mapping $src to rpmbuild/SOURCES"
+        if [[ -d ${src} ]]; then
+          arg = "-v $src:/in:ro"
+        elif [[ -f ${src} ]]; then
+          fname = basename ${src}
+          arg = "-v $src:/in/$fname:ro"
+        else
+          echo "$src does not exist"
+          exit 1
+        fi
+        echo -n "$arg" > /tmp/mock-container-args
+      shell: bash
+
+    - id: create-container
+      if: ${{ inputs.src }}
+      run: podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out fedora:latest > action.cid
       shell: bash
 
     - id: init-mock-env
