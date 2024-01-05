@@ -37,7 +37,7 @@ runs:
       if: inputs.src != null
       run: |
         src="${{ inputs.src }}"
-        if [[ "$src" != /* ]]; then src="./$src"; fi 
+        if [[ "$src" != /* ]]; then src="${{ github.workspace }}/$src"; fi 
         echo "mapping $src to rpmbuild/SOURCES"
         if [[ -d ${src} ]]; then
           arg="-v $src:/in:ro"
