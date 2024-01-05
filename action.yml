@@ -34,7 +34,7 @@ runs:
       shell: bash
 
     - id: map-source
-      if: ${{ inputs.src != "" }}
+      if: inputs.src != ""
       run: |
         src = "${{ inputs.src }}"
         if [[ "$src" != /* ]]; then src = "./$src"; fi 
