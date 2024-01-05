@@ -36,14 +36,14 @@ runs:
     - id: map-source
       if: inputs.src != null
       run: |
-        src = "${{ inputs.src }}"
-        if [[ "$src" != /* ]]; then src = "./$src"; fi 
+        src="${{ inputs.src }}"
+        if [[ "$src" != /* ]]; then src="./$src"; fi 
         echo "mapping $src to rpmbuild/SOURCES"
         if [[ -d ${src} ]]; then
-          arg = "-v $src:/in:ro"
+          arg="-v $src:/in:ro"
         elif [[ -f ${src} ]]; then
-          fname = basename ${src}
-          arg = "-v $src:/in/$fname:ro"
+          fname=basename ${src}
+          arg="-v $src:/in/$fname:ro"
         else
           echo "$src does not exist"
           exit 1
