@@ -43,8 +43,8 @@ runs:
           echo "A"
           arg="-v $src:/in:ro"
         elif [[ -f ${src} ]]; then
-          echo "B"
-          fname=basename ${src}
+          echo "B $src"
+          fname=basename "${src}"
           arg="-v $src:/in/$fname:ro"
         else
           echo "C"
