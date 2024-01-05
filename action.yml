@@ -39,7 +39,6 @@ runs:
         ls ${{ github.workspace }}
         src="${{ inputs.src }}"
         if [[ "$src" != /* ]]; then src="${{ github.workspace }}/$src"; fi 
-        echo "mapping $src to rpmbuild/SOURCES"
         if [[ -d ${src} ]]; then
           arg="-v $src:/in:ro"
         elif [[ -f ${src} ]]; then
@@ -49,6 +48,7 @@ runs:
           echo "$src does not exist"
           exit 1
         fi
+        echo "Adding arg: $arg"
         echo -n "$arg" > /tmp/mock-container-args
       shell: bash
 
