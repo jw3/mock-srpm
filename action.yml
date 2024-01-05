@@ -40,11 +40,14 @@ runs:
         src="${{ inputs.src }}"
         if [[ "$src" != /* ]]; then src="${{ github.workspace }}/$src"; fi 
         if [[ -d ${src} ]]; then
+          echo "A"
           arg="-v $src:/in:ro"
         elif [[ -f ${src} ]]; then
+          echo "B"
           fname=basename ${src}
           arg="-v $src:/in/$fname:ro"
         else
+          echo "C"
           echo "$src does not exist"
           exit 1
         fi
