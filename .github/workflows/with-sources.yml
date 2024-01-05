@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   dir-sources:
-    name: Build rpm
+    name: Build rpm from dir sources
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +33,7 @@ jobs:
             /tmp/mock/*.rpm
 
   file-sources:
-    name: Build rpm
+    name: Build rpm from file source
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
