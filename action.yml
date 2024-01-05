@@ -44,7 +44,7 @@ runs:
           arg="-v $src:/in:ro"
         elif [[ -f ${src} ]]; then
           echo "B $src"
-          fname=basename "${src}"
+          fname=$(basename "${src}")
           arg="-v $src:/in/$fname:ro"
         else
           echo "C"
