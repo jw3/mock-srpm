@@ -89,7 +89,7 @@ runs:
         done
       shell: bash
 
-    - id: copy-in-specs
+    - id: copy-in-spec
       run: |
         cid=$(cat action.cid)
         spec=$(basename ${{ inputs.spec }})
