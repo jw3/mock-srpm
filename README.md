@@ -44,7 +44,7 @@ jobs:
 
 ## Caching
 
-Actions caching of the Mock chroot, via the `root_cache` plugin, is enabled by default.
+Using actions/cache for the Mock chroot, via the `root_cache` plugin, is enabled by default.
 
 ## About Mock
 
