@@ -59,7 +59,7 @@ runs:
       uses: actions/cache/restore@v3
       with:
         path: /tmp/mock
-        key: ${{ inputs.chroot }}-${{ hashFiles(${{ inputs.spec }}) }}
+        key: ${{ inputs.chroot }}-${{ hashFiles(inputs.spec) }}
 
     - id: load-cache
       if: inputs.cache == 'true' && steps.restore-cache.outputs.cache-hit == 'true'
