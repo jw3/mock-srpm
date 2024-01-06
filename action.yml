@@ -67,7 +67,6 @@ runs:
       shell: bash
 
     - id: create-container
-      if: inputs.cache != 'true' || steps.restore-cache.outputs.cache-hit != 'true'
       run: podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out fedora:latest > action.cid
       shell: bash
 
