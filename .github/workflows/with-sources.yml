@@ -1,4 +1,4 @@
-name: CI (with dir sources)
+name: CI (with sources)
 
 on:
   push:
