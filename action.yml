@@ -63,7 +63,7 @@ runs:
 
     - id: load-cache
       if: inputs.cache == 'true' && steps.restore-cache.outputs.cache-hit == 'true'
-      run: podman load /tmp/mock/image.tar.gz
+      run: podman load --input /tmp/mock/image.tar.gz
       shell: bash
 
     - id: create-container
@@ -84,7 +84,7 @@ runs:
       run: |
         cid=$(cat action.cid)
         podman commit $cid fedora:latest
-        podman save fedora:latest /tmp/mock/image.tar.gz
+        podman save fedora:latest | gzip > /tmp/mock/image.tar.gz
       shell: bash
 
     - id: save-cache
