@@ -35,6 +35,7 @@ runs:
       run: |
         touch /tmp/mock-container-args
         mkdir -p ${{ inputs.result-dir }}
+        mkdir -p /var/cache/mock
       shell: bash
 
     - id: map-source
@@ -54,45 +55,30 @@ runs:
         echo -n "$arg" > /tmp/mock-container-args
       shell: bash
 
-    - id: restore-cache
+    - id: restore-bootstrap-cache
       if: inputs.cache == 'true'
       uses: actions/cache/restore@v3
       with:
-        path: /tmp/mock
-        key: ${{ inputs.chroot }}-${{ hashFiles(inputs.spec) }}
-
-    - id: load-cached-image
-      if: inputs.cache == 'true' && steps.restore-cache.outputs.cache-hit == 'true'
-      run: podman load --input /tmp/mock/image.tar.gz
-      shell: bash
+        path: /var/cache/mock/${{ inputs.chroot }}-bootstrap
+        key: ${{ inputs.chroot }}-bootstrap
 
     - id: create-container
-      run: podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out fedora:latest > action.cid
+      run: podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out -v /var/cache/mock:/var/cache/mock fedora:latest > action.cid
       shell: bash
 
     - id: init-mock-env
-      if: inputs.cache != 'true' || steps.restore-cache.outputs.cache-hit != 'true'
       run: |
         cid=$(cat action.cid)
         podman exec $cid dnf install -y mock
         podman exec $cid mock -r ${{ inputs.chroot }} --init
       shell: bash
 
-    - id: write-cached-image
-      if: inputs.cache == 'true' && steps.restore-cache.outputs.cache-hit != 'true'
-      run: |
-        cid=$(cat action.cid)
-        podman commit $cid fedora:latest
-        mkdir -p /tmp/mock
-        podman save fedora:latest | gzip > /tmp/mock/image.tar.gz
-      shell: bash
-
-    - id: save-cache
-      if: inputs.cache == 'true' && steps.restore-cache.outputs.cache-hit != 'true'
+    - id: cache-chroot-bootstrap
+      if: inputs.cache == 'true'
       uses: actions/cache/save@v3
       with:
-        path: /tmp/mock
-        key: ${{ steps.restore-cache.outputs.cache-primary-key }}
+        path: /var/cache/mock/${{ inputs.chroot }}-bootstrap
+        key: ${{ steps.restore-bootstrap-cache.outputs.cache-primary-key }}
 
     - id: copy-in-sources
       if: inputs.src != null
@@ -111,6 +97,13 @@ runs:
         podman exec $cid mock -r ${{ inputs.chroot }} --copyin /tmp/$spec /builddir/build/SPECS
       shell: bash
 
+    - id: restore-chroot-cache
+      if: inputs.cache == 'true'
+      uses: actions/cache/restore@v3
+      with:
+        path: /var/cache/mock/${{ inputs.chroot }}
+        key: ${{ inputs.chroot }}
+
     - id: build
       run: |
         cid=$(cat action.cid)
@@ -123,3 +116,10 @@ runs:
         cid=$(cat action.cid)
         podman exec $cid mock -r ${{ inputs.chroot }} --copyout /builddir/build/SRPMS/* /out
       shell: bash
+
+    - id: save-cache
+      if: inputs.cache == 'true'
+      uses: actions/cache/save@v3
+      with:
+        path: /var/cache/mock/${{ inputs.chroot }}
+        key: ${{ steps.restore-chroot-cache.outputs.cache-primary-key }}
