@@ -55,12 +55,12 @@ runs:
         echo -n "$arg" > /tmp/mock-container-args
       shell: bash
 
-    - id: restore-bootstrap-cache
+    - id: restore-mock-cache
       if: inputs.cache == 'true'
       uses: actions/cache/restore@v3
       with:
-        path: /tmp/cache/mock/${{ inputs.chroot }}-bootstrap
-        key: ${{ inputs.chroot }}-bootstrap-${{ hashFiles(inputs.spec) }}
+        path: /tmp/cache/mock
+        key: ${{ inputs.chroot }}-mock-${{ hashFiles(inputs.spec) }}
 
     - id: create-container
       run: podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out -v /tmp/cache/mock:/var/cache/mock fedora:latest > action.cid
@@ -73,12 +73,12 @@ runs:
         podman exec $cid mock -r ${{ inputs.chroot }} --init
       shell: bash
 
-    - id: cache-chroot-bootstrap
-      if: inputs.cache == 'true' && steps.restore-bootstrap-cache.outputs.cache-hit != 'true'
+    - id: cache-bootstrap-on-fail
+      if: inputs.cache == 'true' && failure()
       uses: actions/cache/save@v3
       with:
-        path: /tmp/cache/mock/${{ inputs.chroot }}-bootstrap
-        key: ${{ steps.restore-bootstrap-cache.outputs.cache-primary-key }}
+        path: /tmp/cache/mock
+        key: ${{ steps.restore-mock-cache.outputs.cache-primary-key }}
 
     - id: copy-in-sources
       if: inputs.src != null
@@ -97,13 +97,6 @@ runs:
         podman exec $cid mock -r ${{ inputs.chroot }} --copyin /tmp/$spec /builddir/build/SPECS
       shell: bash
 
-    - id: restore-chroot-cache
-      if: inputs.cache == 'true'
-      uses: actions/cache/restore@v3
-      with:
-        path: /tmp/cache/mock/${{ inputs.chroot }}
-        key: ${{ inputs.chroot }}-${{ hashFiles(inputs.spec) }}
-
     - id: build
       run: |
         cid=$(cat action.cid)
@@ -118,8 +111,8 @@ runs:
       shell: bash
 
     - id: save-cache
-      if: inputs.cache == 'true' && steps.restore-chroot-cache.outputs.cache-hit != 'true'
+      if: inputs.cache == 'true' && always()
       uses: actions/cache/save@v3
       with:
-        path: /tmp/cache/mock/${{ inputs.chroot }}
-        key: ${{ steps.restore-chroot-cache.outputs.cache-primary-key }}
+        path: /tmp/cache/mock
+        key: ${{ steps.restore-mock-cache.outputs.cache-primary-key }}
