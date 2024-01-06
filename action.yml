@@ -60,7 +60,7 @@ runs:
       uses: actions/cache/restore@v3
       with:
         path: /tmp/cache/mock/${{ inputs.chroot }}-bootstrap
-        key: ${{ inputs.chroot }}-bootstrap
+        key: ${{ inputs.chroot }}-bootstrap-${{ hashFiles(inputs.spec) }}
 
     - id: create-container
       run: podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out -v /tmp/cache/mock:/var/cache/mock fedora:latest > action.cid
@@ -74,7 +74,7 @@ runs:
       shell: bash
 
     - id: cache-chroot-bootstrap
-      if: inputs.cache == 'true'
+      if: inputs.cache == 'true' && steps.restore-bootstrap-cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@v3
       with:
         path: /tmp/cache/mock/${{ inputs.chroot }}-bootstrap
@@ -102,7 +102,7 @@ runs:
       uses: actions/cache/restore@v3
       with:
         path: /tmp/cache/mock/${{ inputs.chroot }}
-        key: ${{ inputs.chroot }}
+        key: ${{ inputs.chroot }}-${{ hashFiles(inputs.spec) }}
 
     - id: build
       run: |
@@ -118,7 +118,7 @@ runs:
       shell: bash
 
     - id: save-cache
-      if: inputs.cache == 'true'
+      if: inputs.cache == 'true' && steps.restore-chroot-cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@v3
       with:
         path: /tmp/cache/mock/${{ inputs.chroot }}
