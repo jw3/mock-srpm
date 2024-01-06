@@ -1,1 +1,1 @@
-echo "hello" > build-withsources
+echo "hello" > withsources
