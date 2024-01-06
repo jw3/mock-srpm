@@ -42,7 +42,6 @@ jobs:
 |----------------|----------|--------------------|-----------------------------------------|
 | **result-dir** | Y        | `github.workspace` | Target path for writing build artifacts |
 
-
 ## Caching
 
 Actions caching of the Mock chroot, via the `root_cache` plugin, is enabled by default.
