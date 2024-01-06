@@ -49,6 +49,7 @@ jobs:
           mv with-sources/build-withsources withsources
           tar cvzf withsources.tar.gz withsources
           mv withsources.tar.gz with-sources
+        working-directory: test
       - name: Build srpm
         uses: ./
         with:
