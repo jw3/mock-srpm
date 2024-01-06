@@ -1,4 +1,4 @@
-Mock RPM Action
+Mock SRPM Action
 ===
 
 This GitHub Action provides a friendly interface for building Source RPMs using Mock.
