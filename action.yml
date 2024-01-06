@@ -16,7 +16,7 @@ inputs:
     description: Path (file or dir) mapped to the rpmbuild/SOURCES directory
     required: false
   result-dir:
-    description: Show mock logs
+    description: Target path for writing build artifacts
     required: true
     default: .
 
