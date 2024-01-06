@@ -33,7 +33,7 @@ jobs:
 | **chroot** | Y        |         | Mock chroot id ([_list_](https://github.com/rpm-software-management/mock/tree/main/mock-core-configs/etc/mock)) |
 | **spec**   | Y        |         | Path to spec file                                                                                               |
 | **src**    | N        |         | Path (file or dir) mapped to the rpmbuild/SOURCES directory                                                     |
-
+| cache      | Y        | true    | Enable chroot environment caching                                                                               |
 
 
 ## Outputs
