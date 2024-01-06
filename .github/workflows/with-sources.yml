@@ -19,13 +19,13 @@ jobs:
         uses: ./
         with:
           chroot: fedora-39-x86_64
-          spec: test/simple/simple.spec
-          src: test/with-sources
+          spec: test/with-sources/withsources.spec
+          src: test/with-sources/
       - name: Build rpm
         uses: jw3/mock-rpm@v0
         with:
           chroot: fedora-39-x86_64
-          srpm: simple-*.src.rpm
+          srpm: withsources-*.src.rpm
       - uses: actions/upload-artifact@v3
         with:
           name: rpm-artifacts
@@ -41,13 +41,13 @@ jobs:
         uses: ./
         with:
           chroot: fedora-39-x86_64
-          spec: test/simple/simple.spec
+          spec: test/with-sources/withsources.spec
           src: test/with-sources/withsources.tar.gz
       - name: Build rpm
         uses: jw3/mock-rpm@v0
         with:
           chroot: fedora-39-x86_64
-          srpm: simple-*.src.rpm
+          srpm: withsources-*.src.rpm
       - uses: actions/upload-artifact@v3
         with:
           name: rpm-artifacts
