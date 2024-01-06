@@ -26,6 +26,7 @@ jobs:
         with:
           chroot: fedora-39-x86_64
           srpm: withsources-*.src.rpm
+          debug: true
       - uses: actions/upload-artifact@v3
         with:
           name: rpm-artifacts
@@ -48,6 +49,7 @@ jobs:
         with:
           chroot: fedora-39-x86_64
           srpm: withsources-*.src.rpm
+          debug: true
       - uses: actions/upload-artifact@v3
         with:
           name: rpm-artifacts
