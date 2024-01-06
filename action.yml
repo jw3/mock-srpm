@@ -1,5 +1,5 @@
 name: mock srpm build
-author: John Wass
+author: jw3
 description: Action for simple chroot building of source RPMs
 branding:
   icon: package
