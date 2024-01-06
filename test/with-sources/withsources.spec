@@ -1,3 +1,5 @@
+%global debug_package %{nil}
+
 Summary:       Nothing
 Name:          withsources
 Version:       0.0.0
