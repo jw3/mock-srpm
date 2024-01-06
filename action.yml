@@ -61,14 +61,30 @@ runs:
         podman exec $cid mock -r ${{ inputs.chroot }} --init
       shell: bash
 
-    - id: build
+    - id: copy-in-sources
+      if: inputs.src != null
+      run: |
+        cid=$(cat action.cid)
+        podman exec $cid mock -r ${{ inputs.chroot }} --copyin /in /builddir/build/SOURCES
+        podman exec $cid ls -alR /var/lib/mock/fedora-39-x86_64/root/builddir/build/SOURCES
+      shell: bash
+
+    - id: copy-in-specs
       run: |
         cid=$(cat action.cid)
         spec=$(basename ${{ inputs.spec }})
         podman cp ${{ inputs.spec }} $cid:/tmp/$spec
         podman exec $cid mock -r ${{ inputs.chroot }} --copyin /tmp/$spec /builddir/build/SPECS
-        podman exec $cid mock -r ${{ inputs.chroot }} --copyin /in/* /builddir/build/SOURCES || true
-        podman exec $cid ls -alR /var/lib/mock/fedora-39-x86_64/root/builddir/build/SOURCES
+      shell: bash
+
+    - id: build
+      run: |
+        cid=$(cat action.cid)
         podman exec $cid mock -r ${{ inputs.chroot }} --shell rpmbuild -bs /builddir/build/SPECS/$spec
+      shell: bash
+
+    - id: copy-out
+      run: |
+        cid=$(cat action.cid)
         podman exec $cid mock -r ${{ inputs.chroot }} --copyout /builddir/build/SRPMS/* /out
       shell: bash
