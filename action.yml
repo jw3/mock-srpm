@@ -67,7 +67,7 @@ runs:
         spec=$(basename ${{ inputs.spec }})
         podman cp ${{ inputs.spec }} $cid:/tmp/$spec
         podman exec $cid mock -r ${{ inputs.chroot }} --copyin /tmp/$spec /builddir/build/SPECS
-        podman exec -w / $cid mock -r ${{ inputs.chroot }} --copyin in/ /builddir/build/SOURCES || true
+        podman exec $cid mock -r ${{ inputs.chroot }} --copyin /in/* /builddir/build/SOURCES || true
         podman exec $cid ls -alR /var/lib/mock/fedora-39-x86_64/root/builddir/build/SOURCES
         podman exec $cid mock -r ${{ inputs.chroot }} --shell rpmbuild -bs /builddir/build/SPECS/$spec
         podman exec $cid mock -r ${{ inputs.chroot }} --copyout /builddir/build/SRPMS/* /out
