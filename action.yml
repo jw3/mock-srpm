@@ -35,7 +35,7 @@ runs:
       run: |
         touch /tmp/mock-container-args
         mkdir -p ${{ inputs.result-dir }}
-        mkdir -p /var/cache/mock
+        mkdir -p /tmp/cache/mock
       shell: bash
 
     - id: map-source
@@ -59,11 +59,11 @@ runs:
       if: inputs.cache == 'true'
       uses: actions/cache/restore@v3
       with:
-        path: /var/cache/mock/${{ inputs.chroot }}-bootstrap
+        path: /tmp/cache/mock/${{ inputs.chroot }}-bootstrap
         key: ${{ inputs.chroot }}-bootstrap
 
     - id: create-container
-      run: podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out -v /var/cache/mock:/var/cache/mock fedora:latest > action.cid
+      run: podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out -v /tmp/cache/mock:/var/cache/mock fedora:latest > action.cid
       shell: bash
 
     - id: init-mock-env
@@ -77,7 +77,7 @@ runs:
       if: inputs.cache == 'true'
       uses: actions/cache/save@v3
       with:
-        path: /var/cache/mock/${{ inputs.chroot }}-bootstrap
+        path: /tmp/cache/mock/${{ inputs.chroot }}-bootstrap
         key: ${{ steps.restore-bootstrap-cache.outputs.cache-primary-key }}
 
     - id: copy-in-sources
@@ -101,7 +101,7 @@ runs:
       if: inputs.cache == 'true'
       uses: actions/cache/restore@v3
       with:
-        path: /var/cache/mock/${{ inputs.chroot }}
+        path: /tmp/cache/mock/${{ inputs.chroot }}
         key: ${{ inputs.chroot }}
 
     - id: build
@@ -121,5 +121,5 @@ runs:
       if: inputs.cache == 'true'
       uses: actions/cache/save@v3
       with:
-        path: /var/cache/mock/${{ inputs.chroot }}
+        path: /tmp/cache/mock/${{ inputs.chroot }}
         key: ${{ steps.restore-chroot-cache.outputs.cache-primary-key }}
