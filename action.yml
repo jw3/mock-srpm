@@ -68,7 +68,6 @@ runs:
         for f in $(podman exec $cid ls /in); do
           podman exec $cid mock -r ${{ inputs.chroot }} --copyin /in/$f /builddir/build/SOURCES
         done
-        podman exec $cid ls -alR /var/lib/mock/fedora-39-x86_64/root/builddir/build/SOURCES
       shell: bash
 
     - id: copy-in-specs
