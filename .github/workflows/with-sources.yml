@@ -44,6 +44,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: |
+          mkdir withsources
+          mv with-sources/build-withsources withsources
+          tar cvzf withsources.tar.gz withsources
+          mv withsources.tar.gz with-sources
       - name: Build srpm
         uses: ./
         with:
