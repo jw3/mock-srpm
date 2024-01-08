@@ -35,10 +35,10 @@ runs:
     - id: create-container
       run: |
         mkdir -p ${{ inputs.result-dir }}
-        podman run -dt --privileged -v ${{ inputs.src }}:/in:ro -v ${{ inputs.result-dir }}:/out ${{ inputs.docker-image }} > action.cid
+        podman run -dt --privileged -v ${{ inputs.src }}:/in:ro -v ${{ inputs.result-dir }}:/out ${{ inputs.image }} > action.cid
       shell: bash
 
-    # Skip this job if ${{ inputs.docker-image }} is not the default.  It is expected that any pre-built Docker image
+    # Skip this job if ${{ inputs.image }} is not the default.  It is expected that any pre-built Docker image
     # will have mock installed and configured ahead of time.
     - id: init-mock-env
       run: |
