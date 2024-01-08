@@ -1,3 +1,4 @@
+name: mock srpm build
 author: jw3
 description: Action for simple chroot building of source RPMs
 branding:
