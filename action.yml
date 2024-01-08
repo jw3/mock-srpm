@@ -63,8 +63,8 @@ runs:
     - id: init-mock-env
       run: |
         cid=$(cat action.cid)
-        podman exec $cid dnf install -y mock
-        podman exec $cid mock -r ${{ inputs.chroot }} --init
+        podman exec $cid 'mock || dnf install -y mock'
+        #podman exec $cid mock -r ${{ inputs.chroot }} --init
       shell: bash
       if: ${{ inputs.image }} == 'fedora:latest'
 
