@@ -1,5 +1,4 @@
-name: mock srpm build
-author: John Wass
+author: jw3
 description: Action for simple chroot building of source RPMs
 branding:
   icon: package
@@ -13,11 +12,10 @@ inputs:
     description: Path to spec file
     required: true
   src:
-    description: Source file or directory
-    required: true
-    default: .
+    description: Path (file or dir) mapped to the rpmbuild/SOURCES directory
+    required: false
   result-dir:
-    description: Show mock logs
+    description: Target path for writing build artifacts
     required: true
     default: .
   image:
@@ -32,10 +30,31 @@ runs:
       run: sudo apt install -y podman
       shell: bash
 
-    - id: create-container
+    - id: prep-fs
       run: |
+        touch /tmp/mock-container-args
         mkdir -p ${{ inputs.result-dir }}
-        podman run -dt --privileged -v ${{ inputs.src }}:/in:ro -v ${{ inputs.result-dir }}:/out ${{ inputs.image }} > action.cid
+      shell: bash
+
+    - id: map-source
+      if: inputs.src != null
+      run: |
+        src="${{ inputs.src }}"
+        if [[ "$src" != /* ]]; then src="${{ github.workspace }}/$src"; fi 
+        if [[ -d ${src} ]]; then
+          arg="-v $src:/in:ro"
+        elif [[ -f ${src} ]]; then
+          fname=$(basename "${src}")
+          arg="-v $src:/in/$fname:ro"
+        else
+          echo "$src does not exist"
+          exit 1
+        fi
+        echo -n "$arg" > /tmp/mock-container-args
+      shell: bash
+
+    - id: create-container
+      run: podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out ${{ inputs.image }} > action.cid
       shell: bash
 
     # Skip this job if ${{ inputs.image }} is not the default.  It is expected that any pre-built Docker image
@@ -48,13 +67,32 @@ runs:
       shell: bash
       if: ${{ inputs.image }} == 'fedora:latest'
 
-    - id: build
+    - id: copy-in-sources
+      if: inputs.src != null
+      run: |
+        cid=$(cat action.cid)
+        for f in $(podman exec $cid ls /in); do
+          podman exec $cid mock -r ${{ inputs.chroot }} --copyin /in/$f /builddir/build/SOURCES
+        done
+      shell: bash
+
+    - id: copy-in-specs
       run: |
         cid=$(cat action.cid)
         spec=$(basename ${{ inputs.spec }})
         podman cp ${{ inputs.spec }} $cid:/tmp/$spec
         podman exec $cid mock -r ${{ inputs.chroot }} --copyin /tmp/$spec /builddir/build/SPECS
-        podman exec $cid mock -r ${{ inputs.chroot }} --copyin /in /builddir/build/SOURCES
+      shell: bash
+
+    - id: build
+      run: |
+        cid=$(cat action.cid)
+        spec=$(basename ${{ inputs.spec }})
         podman exec $cid mock -r ${{ inputs.chroot }} --shell rpmbuild -bs /builddir/build/SPECS/$spec
+      shell: bash
+
+    - id: copy-out
+      run: |
+        cid=$(cat action.cid)
         podman exec $cid mock -r ${{ inputs.chroot }} --copyout /builddir/build/SRPMS/* /out
       shell: bash
