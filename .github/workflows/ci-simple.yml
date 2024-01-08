@@ -21,7 +21,7 @@ jobs:
           chroot: fedora-39-x86_64
           spec: test/simple/simple.spec
       - name: Build rpm
-        uses: jw3/mock-rpm@v0
+        uses: bschonec/mock-rpm@prebuilt_docker_image
         with:
           chroot: fedora-39-x86_64
           srpm: simple-*.src.rpm
