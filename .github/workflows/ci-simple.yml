@@ -20,6 +20,7 @@ jobs:
         with:
           chroot: fedora-39-x86_64
           spec: test/simple/simple.spec
+          cache: false
       - name: Build rpm
         uses: jw3/mock-rpm@cache
         with:

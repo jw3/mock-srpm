@@ -10,36 +10,6 @@ permissions:
   contents: read
 
 jobs:
-  dir-sources:
-    name: Build rpm from dir sources
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: |
-          mkdir withsources
-          mv with-sources/build-withsources withsources
-          tar cvzf withsources.tar.gz withsources
-          mv withsources.tar.gz with-sources
-        working-directory: test
-      - name: Build srpm
-        uses: ./
-        with:
-          chroot: fedora-39-x86_64
-          spec: test/with-sources/withsources.spec
-          src: test/with-sources/
-          cache: false
-      - name: Build rpm
-        uses: jw3/mock-rpm@cache
-        with:
-          chroot: fedora-39-x86_64
-          srpm: withsources-*.src.rpm
-          debug: true
-      - uses: actions/upload-artifact@v3
-        with:
-          name: rpm-artifacts
-          path: |
-            *.rpm
-
   file-sources:
     name: Build rpm from file source
     runs-on: ubuntu-latest
@@ -57,7 +27,12 @@ jobs:
           chroot: fedora-39-x86_64
           spec: test/with-sources/withsources.spec
           src: test/with-sources/withsources.tar.gz
-          cache: false
+      - name: Build srpm
+        uses: ./
+        with:
+          chroot: fedora-39-x86_64
+          spec: test/with-sources/withsources.spec
+          src: test/with-sources/withsources.tar.gz
       - name: Build rpm
         uses: jw3/mock-rpm@v0
         with:
