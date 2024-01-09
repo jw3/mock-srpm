@@ -27,7 +27,6 @@ jobs:
           chroot: fedora-39-x86_64
           spec: test/with-sources/withsources.spec
           src: test/with-sources/
-          cache: false
       - name: Build rpm
         uses: jw3/mock-rpm@cache
         with:
@@ -57,7 +56,6 @@ jobs:
           chroot: fedora-39-x86_64
           spec: test/with-sources/withsources.spec
           src: test/with-sources/withsources.tar.gz
-          cache: false
       - name: Build rpm
         uses: jw3/mock-rpm@v0
         with:

@@ -27,18 +27,21 @@ jobs:
           chroot: fedora-39-x86_64
           spec: test/with-sources/withsources.spec
           src: test/with-sources/withsources.tar.gz
+          cache: true
       - name: Build srpm 2
         uses: ./
         with:
           chroot: fedora-39-x86_64
           spec: test/with-sources/withsources.spec
           src: test/with-sources/withsources.tar.gz
+          cache: true
       - name: Build srpm 3
         uses: ./
         with:
           chroot: fedora-39-x86_64
           spec: test/with-sources/withsources.spec
           src: test/with-sources/withsources.tar.gz
+          cache: true
       - name: Build rpm
         uses: jw3/mock-rpm@v0
         with:

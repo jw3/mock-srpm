@@ -17,8 +17,7 @@ inputs:
     required: false
   cache:
     description: Enable chroot environment caching
-    required: true
-    default: 'true'
+    required: false
   image:
     description: Container image for mock environment
     required: true
