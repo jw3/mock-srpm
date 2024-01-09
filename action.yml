@@ -100,7 +100,7 @@ runs:
         iid="${{ hashFiles(inputs.spec) }}-${{ inputs.image }}"
         podman commit $cid $iid
         mkdir -p /tmp/mock
-        podman save $iid | gzip > /tmp/mock/image.tar.gz
+        podman save $iid | gzip > /tmp/cache/image.tar.gz
       shell: bash
 
     - id: save-image
