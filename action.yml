@@ -19,6 +19,9 @@ inputs:
     description: Enable chroot environment caching
     required: true
     default: 'true'
+  image:
+    description: Specify a container image preinstalled with mock
+    required: false
   result-dir:
     description: Target path for writing build artifacts
     required: true
@@ -55,12 +58,24 @@ runs:
         echo -n "$arg" > /tmp/mock-container-args
       shell: bash
 
-    - id: restore-mock-cache
+    - id: restore-image
+      if: inputs.cache == 'true' && inputs.image == null
+      uses: actions/cache/restore@v3
+      with:
+        path: /tmp/cache/image.tar.gz
+        key: image-${{ hashFiles(inputs.spec) }}
+
+    - id: load-image
+      if: inputs.cache == 'true' && inputs.image == null && steps.restore-image.outputs.cache-hit == 'true'
+      run: podman load --input /tmp/cache/image.tar.gz
+      shell: bash
+
+    - id: restore-chroot
       if: inputs.cache == 'true'
       uses: actions/cache/restore@v3
       with:
         path: /tmp/cache/mock
-        key: mock-${{ inputs.chroot }}-${{ hashFiles(inputs.spec) }}
+        key: chroot-${{ inputs.chroot }}-${{ hashFiles(inputs.spec) }}
 
     - id: create-container
       run: |
@@ -69,13 +84,23 @@ runs:
       shell: bash
 
     - id: install-mock
+      if: inputs.image == null && (inputs.cache != 'true' || steps.restore-image.outputs.cache-hit != 'true')
       run: |
         cid=$(cat action.cid)
         podman exec $cid dnf install -y mock
       shell: bash
 
+    - id: cache-save-image
+      if: inputs.cache == 'true' && steps.restore-image.outputs.cache-hit != 'true'
+      run: |
+        cid=$(cat action.cid)
+        podman commit $cid fedora:latest
+        mkdir -p /tmp/mock
+        podman save fedora:latest | gzip > /tmp/mock/image.tar.gz
+      shell: bash
+
     - id: init-mock
-      if: inputs.cache != 'true' || steps.restore-mock-cache.outputs.cache-hit != 'true'
+      if: inputs.cache != 'true' || steps.restore-chroot.outputs.cache-hit != 'true'
       run: |
         cid=$(cat action.cid)
         podman exec $cid mock -r ${{ inputs.chroot }} --init
@@ -106,9 +131,9 @@ runs:
         podman exec $cid mock -r ${{ inputs.chroot }} --copyout /builddir/build/SRPMS/* /out
       shell: bash
 
-    - id: save-cache
-      if: inputs.cache == 'true' && steps.restore-mock-cache.outputs.cache-hit != 'true'
+    - id: save-chroot
+      if: inputs.cache == 'true' && steps.restore-chroot.outputs.cache-hit != 'true'
       uses: actions/cache/save@v3
       with:
         path: /tmp/cache/mock
-        key: ${{ steps.restore-mock-cache.outputs.cache-primary-key }}
+        key: ${{ steps.restore-chroot.outputs.cache-primary-key }}
