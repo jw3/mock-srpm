@@ -19,9 +19,6 @@ inputs:
     description: Enable chroot environment caching
     required: true
     default: 'true'
-  image:
-    description: Specify a container image preinstalled with mock
-    required: false
   result-dir:
     description: Target path for writing build artifacts
     required: true
@@ -58,18 +55,6 @@ runs:
         echo -n "$arg" > /tmp/mock-container-args
       shell: bash
 
-    - id: restore-image
-      if: inputs.cache == 'true' && inputs.image == null
-      uses: actions/cache/restore@v3
-      with:
-        path: /tmp/cache/image.tar.gz
-        key: image-${{ hashFiles(inputs.spec) }}
-
-    - id: load-image
-      if: inputs.cache == 'true' && inputs.image == null && steps.restore-image.outputs.cache-hit == 'true'
-      run: podman load --input /tmp/cache/image.tar.gz
-      shell: bash
-
     - id: restore-chroot
       if: inputs.cache == 'true'
       uses: actions/cache/restore@v3
@@ -77,14 +62,29 @@ runs:
         path: /tmp/cache/mock
         key: chroot-${{ inputs.chroot }}-${{ hashFiles(inputs.spec) }}
 
+    - id: restore-image
+      if: inputs.cache == 'true'
+      uses: actions/cache/restore@v3
+      with:
+        path: /tmp/cache/image.tar.gz
+        key: image-${{ hashFiles(inputs.spec) }}
+
+    - id: load-image
+      if: inputs.cache == 'true' && steps.restore-image.outputs.cache-hit == 'true'
+      run: |
+        podman load --input /tmp/cache/image.tar.gz
+        echo "${{ hashFiles(inputs.spec) }}" > action.iid
+      shell: bash
+
     - id: create-container
       run: |
         ls -alR /tmp/cache/mock
-        podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out -v /tmp/cache/mock:/var/cache/mock fedora:latest > action.cid
+        iid=$(cat action.iid || echo "fedora:latest")
+        podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out -v /tmp/cache/mock:/var/cache/mock $iid > action.cid
       shell: bash
 
     - id: install-mock
-      if: inputs.image == null && (inputs.cache != 'true' || steps.restore-image.outputs.cache-hit != 'true')
+      if: inputs.cache != 'true' || steps.restore-image.outputs.cache-hit != 'true'
       run: |
         cid=$(cat action.cid)
         podman exec $cid dnf install -y mock
@@ -94,9 +94,10 @@ runs:
       if: inputs.cache == 'true' && steps.restore-image.outputs.cache-hit != 'true'
       run: |
         cid=$(cat action.cid)
-        podman commit $cid fedora:latest
+        iid=${{ hashFiles(inputs.spec) }}
+        podman commit $cid $iid
         mkdir -p /tmp/mock
-        podman save fedora:latest | gzip > /tmp/mock/image.tar.gz
+        podman save $iid | gzip > /tmp/mock/image.tar.gz
       shell: bash
 
     - id: init-mock
