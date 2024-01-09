@@ -89,7 +89,7 @@ runs:
     - id: install-mock
       run: |
         cid=$(cat action.cid)
-        mockver=$(podman exec $cid mock --version)
+        mockver=$(podman exec $cid mock --version || true)
         if [[ -z $mockver ]]; then
           podman exec $cid dnf install -y mock
           echo "completed=true" >> $GITHUB_OUTPUT
