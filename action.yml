@@ -60,7 +60,7 @@ runs:
       uses: actions/cache/restore@v3
       with:
         path: /tmp/cache/mock
-        key: ${{ inputs.chroot }}-mock-${{ hashFiles(inputs.spec) }}
+        key: ${{ inputs.chroot }}-${{ hashFiles(inputs.spec) }}
 
     - id: create-container
       run: podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out -v /tmp/cache/mock:/var/cache/mock fedora:latest > action.cid
@@ -72,13 +72,6 @@ runs:
         podman exec $cid dnf install -y mock
         podman exec $cid mock -r ${{ inputs.chroot }} --init
       shell: bash
-
-    - id: cache-bootstrap-on-fail
-      if: inputs.cache == 'true' && failure()
-      uses: actions/cache/save@v3
-      with:
-        path: /tmp/cache/mock
-        key: ${{ steps.restore-mock-cache.outputs.cache-primary-key }}
 
     - id: copy-in-sources
       if: inputs.src != null
@@ -102,11 +95,6 @@ runs:
         cid=$(cat action.cid)
         spec=$(basename ${{ inputs.spec }})
         podman exec $cid mock -r ${{ inputs.chroot }} --shell rpmbuild -bs /builddir/build/SPECS/$spec
-      shell: bash
-
-    - id: copy-out
-      run: |
-        cid=$(cat action.cid)
         podman exec $cid mock -r ${{ inputs.chroot }} --copyout /builddir/build/SRPMS/* /out
       shell: bash
 
