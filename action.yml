@@ -69,12 +69,10 @@ runs:
       shell: bash
 
     - id: install-mock
-      if: inputs.cache != 'true' || steps.restore-mock-cache.outputs.cache-hit != 'true'
       run: |
         cid=$(cat action.cid)
         podman exec $cid dnf install -y mock
       shell: bash
-
 
     - id: init-mock
       if: inputs.cache != 'true' || steps.restore-mock-cache.outputs.cache-hit != 'true'
