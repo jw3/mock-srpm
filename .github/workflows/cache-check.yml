@@ -21,13 +21,19 @@ jobs:
           tar cvzf withsources.tar.gz withsources
           mv withsources.tar.gz with-sources
         working-directory: test
-      - name: Build srpm
+      - name: Build srpm 1
         uses: ./
         with:
           chroot: fedora-39-x86_64
           spec: test/with-sources/withsources.spec
           src: test/with-sources/withsources.tar.gz
-      - name: Build srpm
+      - name: Build srpm 2
+        uses: ./
+        with:
+          chroot: fedora-39-x86_64
+          spec: test/with-sources/withsources.spec
+          src: test/with-sources/withsources.tar.gz
+      - name: Build srpm 3
         uses: ./
         with:
           chroot: fedora-39-x86_64

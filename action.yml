@@ -19,6 +19,10 @@ inputs:
     description: Enable chroot environment caching
     required: true
     default: 'true'
+  image:
+    description: Container image for mock environment
+    required: true
+    default: 'fedora:latest'
   result-dir:
     description: Target path for writing build artifacts
     required: true
@@ -67,19 +71,18 @@ runs:
       uses: actions/cache/restore@v3
       with:
         path: /tmp/cache/image.tar.gz
-        key: image-${{ hashFiles(inputs.spec) }}
+        key: image-${{ hashFiles(inputs.spec) }}-${{ inputs.image }}
 
     - id: load-image
       if: inputs.cache == 'true' && steps.restore-image.outputs.cache-hit == 'true'
       run: |
         podman load --input /tmp/cache/image.tar.gz
-        echo "${{ hashFiles(inputs.spec) }}" > action.iid
+        echo "${{ hashFiles(inputs.spec) }}-${{ inputs.image }}" > action.iid
       shell: bash
 
     - id: create-container
       run: |
-        ls -alR /tmp/cache/mock
-        iid=$(cat action.iid || echo "fedora:latest")
+        iid=$(cat action.iid || echo "${{ inputs.image }}")
         podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out -v /tmp/cache/mock:/var/cache/mock $iid > action.cid
       shell: bash
 
@@ -94,7 +97,7 @@ runs:
       if: inputs.cache == 'true' && steps.restore-image.outputs.cache-hit != 'true'
       run: |
         cid=$(cat action.cid)
-        iid=${{ hashFiles(inputs.spec) }}
+        iid="${{ hashFiles(inputs.spec) }}-${{ inputs.image }}"
         podman commit $cid $iid
         mkdir -p /tmp/mock
         podman save $iid | gzip > /tmp/mock/image.tar.gz
