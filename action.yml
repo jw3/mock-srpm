@@ -19,7 +19,7 @@ inputs:
     description: Enable chroot environment caching
     required: false
   image:
-    description: Container image for mock environment
+    description: Container image for Mock execution
     required: true
     default: 'fedora:latest'
   result-dir:

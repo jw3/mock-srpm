@@ -28,13 +28,14 @@ jobs:
 
 ## Inputs
 
-| Name            | Required | Default            | Description                                                                                                      |
-|-----------------|----------|--------------------|------------------------------------------------------------------------------------------------------------------|
-| **chroot**      | Y        |                    | Mock chroot id ([_list_](https://github.com/rpm-software-management/mock/tree/main/mock-core-configs/etc/mock))  |
-| **spec**        | Y        |                    | Path to spec file                                                                                                |
-| **src**         | N        |                    | Path (file or dir) mapped to the rpmbuild/SOURCES directory                                                      |
-| **cache**       | N        |                    | Enable chroot environment caching                                                                                |
-| **result-dir**  | Y        | `github.workspace` | Target path for writing build artifacts                                                                          |
+| Name           | Required | Default            | Description                                                                                                     |
+|----------------|----------|--------------------|-----------------------------------------------------------------------------------------------------------------|
+| **chroot**     | Y        |                    | Mock chroot id ([_list_](https://github.com/rpm-software-management/mock/tree/main/mock-core-configs/etc/mock)) |
+| **spec**       | Y        |                    | Path to spec file                                                                                               |
+| **src**        | N        |                    | Path (file or dir) mapped to the rpmbuild/SOURCES directory                                                     |
+| **cache**      | N        |                    | Enable chroot environment caching                                                                               |
+| **image**      | N        | 'fedora:latest'    | Container image for Mock execution                                                                              |
+| **result-dir** | Y        | `github.workspace` | Target path for writing build artifacts                                                                         |
 
 ## Caching
 
