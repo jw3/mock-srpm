@@ -87,14 +87,17 @@ runs:
       shell: bash
 
     - id: install-mock
-      if: inputs.cache != 'true' || steps.restore-image.outputs.cache-hit != 'true'
       run: |
         cid=$(cat action.cid)
-        podman exec $cid dnf install -y mock
+        mockver=$(podman exec $cid mock --version)
+        if [[ -z $mockver ]]; then
+          podman exec $cid dnf install -y mock
+          echo "completed=true" >> $GITHUB_OUTPUT
+        fi
       shell: bash
 
     - id: save-container
-      if: inputs.cache == 'true' && steps.restore-image.outputs.cache-hit != 'true'
+      if: inputs.cache == 'true' && steps.install-mock.outputs.completed == 'true'
       run: |
         cid=$(cat action.cid)
         iid="${{ hashFiles(inputs.spec) }}-${{ inputs.image }}"
