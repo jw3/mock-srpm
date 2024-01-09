@@ -93,7 +93,7 @@ runs:
         podman exec $cid dnf install -y mock
       shell: bash
 
-    - id: cache-save-image
+    - id: save-container
       if: inputs.cache == 'true' && steps.restore-image.outputs.cache-hit != 'true'
       run: |
         cid=$(cat action.cid)
@@ -102,6 +102,13 @@ runs:
         mkdir -p /tmp/mock
         podman save $iid | gzip > /tmp/mock/image.tar.gz
       shell: bash
+
+    - id: save-image
+      if: inputs.cache == 'true' && steps.restore-image.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v3
+      with:
+        path: /tmp/cache/image.tar.gz
+        key: ${{ steps.restore-image.outputs.cache-primary-key }}
 
     - id: init-mock
       if: inputs.cache != 'true' || steps.restore-chroot.outputs.cache-hit != 'true'
