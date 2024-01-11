@@ -69,7 +69,7 @@ runs:
       if: ${{ inputs.image }} == 'fedora:latest'
 
     - id: copy-in-sources
-      if: inputs.src != null
+      #if: inputs.src != null
       run: |
         cid=$(cat action.cid)
         for f in $(podman exec $cid ls /in); do
