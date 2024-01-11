@@ -64,7 +64,7 @@ runs:
       run: |
         cid=$(cat action.cid)
         podman exec $cid dnf install -y mock
-      #  podman exec $cid mock -r ${{ inputs.chroot }} --init
+        podman exec $cid mock -r ${{ inputs.chroot }} --init
       shell: bash
       if: ${{ inputs.image }} == 'fedora:latest'
 
@@ -76,13 +76,14 @@ runs:
           podman exec $cid mock -r ${{ inputs.chroot }} --copyin /in/$f /builddir/build/SOURCES
         done
       shell: bash
+      if: false
 
     - id: copy-in-specs
       run: |
         cid=$(cat action.cid)
         spec=$(basename ${{ inputs.spec }})
         podman cp ${{ inputs.spec }} $cid:/tmp/$spec
-        podman exec $cid mock -r ${{ inputs.chroot }} --copyin /tmp/$spec /builddir/build/SPECS
+        podman exec $cid mock -r ${{ inputs.chroot }} --copyin --clean --buildsrpm --config-opts='use_host_resolv=True' --config-opts='rpmbuild_networking=True' --define='_disable_source_fetch 0' --spec /tmp/$spec /builddir/build/SPECS
       shell: bash
 
     - id: build
@@ -91,9 +92,11 @@ runs:
         spec=$(basename ${{ inputs.spec }})
         podman exec $cid mock -r ${{ inputs.chroot }} --shell rpmbuild -bs /builddir/build/SPECS/$spec
       shell: bash
+      if: false
 
     - id: copy-out
       run: |
         cid=$(cat action.cid)
         podman exec $cid mock -r ${{ inputs.chroot }} --copyout /builddir/build/SRPMS/* /out
       shell: bash
+      if: false
