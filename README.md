@@ -28,11 +28,12 @@ jobs:
 
 ## Inputs
 
-| Name       | Required | Default | Description                                                                                                     |
-|------------|----------|---------|-----------------------------------------------------------------------------------------------------------------|
-| **chroot** | Y        |         | Mock chroot id ([_list_](https://github.com/rpm-software-management/mock/tree/main/mock-core-configs/etc/mock)) |
-| **spec**   | Y        |         | Path to spec file                                                                                               |
-| **src**    | N        |         | Path (file or dir) mapped to the rpmbuild/SOURCES directory                                                     |
+| Name       | Required | Default      | Description                                                                                                     |
+|------------|----------|--------------|-----------------------------------------------------------------------------------------------------------------|
+| **chroot** | Y        |              | Mock chroot id ([_list_](https://github.com/rpm-software-management/mock/tree/main/mock-core-configs/etc/mock)) |
+| **spec**   | Y        |              | Path to spec file                                                                                               |
+| **src**    | N        |              | Path (file or dir) mapped to the rpmbuild/SOURCES directory                                                     |
+| **image**  | N        |fedora:latest | Docker image on which to run mock builds.                                                                       |
 
 
 

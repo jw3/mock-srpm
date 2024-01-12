@@ -19,6 +19,10 @@ inputs:
     description: Target path for writing build artifacts
     required: true
     default: .
+  image:
+    description: Pre-built Docker image to run instead of default.
+    required: true
+    default: 'fedora:latest'
 
 runs:
   using: composite
@@ -51,31 +55,43 @@ runs:
       shell: bash
 
     - id: create-container
-      run: podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out fedora:latest > action.cid
+      run: podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out ${{ inputs.image }} > action.cid
       shell: bash
 
+    # Skip this job if ${{ inputs.image }} is not the default.  It is expected that any pre-built Docker image
+    # will have mock installed and configured ahead of time.
     - id: init-mock-env
       run: |
         cid=$(cat action.cid)
         podman exec $cid dnf install -y mock
         podman exec $cid mock -r ${{ inputs.chroot }} --init
       shell: bash
+      if: ${{ inputs.image }} == 'fedora:latest'
 
     - id: copy-in-sources
-      if: inputs.src != null
+      #if: inputs.src != null
       run: |
         cid=$(cat action.cid)
         for f in $(podman exec $cid ls /in); do
           podman exec $cid mock -r ${{ inputs.chroot }} --copyin /in/$f /builddir/build/SOURCES
         done
       shell: bash
+      if: false
 
     - id: copy-in-specs
       run: |
         cid=$(cat action.cid)
         spec=$(basename ${{ inputs.spec }})
+        podman exec $cid dnf -y install mlocate
+        podman exec $cid /usr/sbin/updatedb
+        podman exec $cid /usr/bin/locate apache
         podman cp ${{ inputs.spec }} $cid:/tmp/$spec
-        podman exec $cid mock -r ${{ inputs.chroot }} --copyin /tmp/$spec /builddir/build/SPECS
+        podman exec $cid mock -r ${{ inputs.chroot }} --copyin --clean --buildsrpm --config-opts='use_host_resolv=True' --config-opts='rpmbuild_networking=True' --define='_disable_source_fetch 0' --spec /tmp/$spec
+        podman exec $cid /usr/sbin/updatedb
+        podman exec $cid /usr/bin/locate apache
+        #
+        #
+        #/builddir/build/SPECS
       shell: bash
 
     - id: build
@@ -84,9 +100,11 @@ runs:
         spec=$(basename ${{ inputs.spec }})
         podman exec $cid mock -r ${{ inputs.chroot }} --shell rpmbuild -bs /builddir/build/SPECS/$spec
       shell: bash
+      if: false
 
     - id: copy-out
       run: |
         cid=$(cat action.cid)
         podman exec $cid mock -r ${{ inputs.chroot }} --copyout /builddir/build/SRPMS/* /out
       shell: bash
+      if: false
