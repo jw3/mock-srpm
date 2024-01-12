@@ -86,7 +86,7 @@ runs:
         podman exec $cid mock -r ${{ inputs.chroot }} --copyin --clean --buildsrpm --config-opts='use_host_resolv=True' --config-opts='rpmbuild_networking=True' --define='_disable_source_fetch 0' --spec /tmp/$spec
         #
         #/builddir/build/SPECS
-        yum -y install mlocate; updatedb
+        dnf -y install mlocate; updatedb
         locate apache
       shell: bash
 
