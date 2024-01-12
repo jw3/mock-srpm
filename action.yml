@@ -82,10 +82,9 @@ runs:
       run: |
         cid=$(cat action.cid)
         spec=$(basename ${{ inputs.spec }})
-        podman exec ${{ inputs.spec }} dnf -y install mlocate; updatedb
         podman cp ${{ inputs.spec }} $cid:/tmp/$spec
         podman exec $cid mock -r ${{ inputs.chroot }} --copyin --clean --buildsrpm --config-opts='use_host_resolv=True' --config-opts='rpmbuild_networking=True' --define='_disable_source_fetch 0' --spec /tmp/$spec
-        podman exec ${{ inputs.spec }} dnf -y install mlocate; updatedb; locate apache
+        podman exec $cid dnf -y install mlocate; updatedb; locate apache
         #
         #/builddir/build/SPECS
       shell: bash
