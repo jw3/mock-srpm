@@ -7,6 +7,8 @@ For building binary RPMs please see the [`jw3/mock-rpm`](https://github.com/jw3/
 
 ## Example workflow
 
+This example produces a src.rpm in the project dir (ie `github.workspace` dir)
+
 ```yaml
 name: build
 on: [push, pull_request]
@@ -16,14 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: jw3/mock-srpm@v0
+      - uses: jw3/mock-srpm@v1
         with:
           chroot: fedora-39-x86_64
           spec: test/simple/simple.spec
-      - uses: jw3/mock-rpm@v0
-        with:
-          chroot: fedora-39-x86_64
-          srpm: simple-*.src.rpm
 ```
 
 ## Inputs
@@ -32,9 +30,9 @@ jobs:
 |----------------|----------|--------------------|-----------------------------------------------------------------------------------------------------------------|
 | **chroot**     | Y        |                    | Mock chroot id ([_list_](https://github.com/rpm-software-management/mock/tree/main/mock-core-configs/etc/mock)) |
 | **spec**       | Y        |                    | Path to spec file                                                                                               |
-| **src**        | N        |                    | Path (file or dir) mapped to the rpmbuild/SOURCES directory                                                     |
+| **sources**    | N        |                    | Path (file or dir) mapped to the rpmbuild/SOURCES directory                                                     |
 | **cache**      | N        |                    | Enable chroot environment caching                                                                               |
-| **image**      | N        | 'fedora:latest'    | Container image for Mock execution                                                                              |
+| **image**      | N        | `fedora:latest`    | Container image for Mock execution                                                                              |
 | **result-dir** | Y        | `github.workspace` | Target path for writing build artifacts                                                                         |
 
 ## Caching
