@@ -28,20 +28,22 @@ jobs:
 
 ## Inputs
 
-| Name       | Required | Default | Description                                                                                                     |
-|------------|----------|---------|-----------------------------------------------------------------------------------------------------------------|
-| **chroot** | Y        |         | Mock chroot id ([_list_](https://github.com/rpm-software-management/mock/tree/main/mock-core-configs/etc/mock)) |
-| **spec**   | Y        |         | Path to spec file                                                                                               |
-| **src**    | N        |         | Path (file or dir) mapped to the rpmbuild/SOURCES directory                                                     |
+| Name           | Required | Default            | Description                                                                                                     |
+|----------------|----------|--------------------|-----------------------------------------------------------------------------------------------------------------|
+| **chroot**     | Y        |                    | Mock chroot id ([_list_](https://github.com/rpm-software-management/mock/tree/main/mock-core-configs/etc/mock)) |
+| **spec**       | Y        |                    | Path to spec file                                                                                               |
+| **src**        | N        |                    | Path (file or dir) mapped to the rpmbuild/SOURCES directory                                                     |
+| **cache**      | N        |                    | Enable chroot environment caching                                                                               |
+| **image**      | N        | 'fedora:latest'    | Container image for Mock execution                                                                              |
+| **result-dir** | Y        | `github.workspace` | Target path for writing build artifacts                                                                         |
 
+## Caching
 
+Using actions/cache to persit the Mock chroot, via the `root_cache` plugin, is enabled by default.
 
-## Outputs
+Also cached is the container image, but only when mock has been installed by this action.
 
-| Name           | Required | Default            | Description                             |
-|----------------|----------|--------------------|-----------------------------------------|
-| **result-dir** | Y        | `github.workspace` | Target path for writing build artifacts |
-
+To enable caching set the `cache` property to 'true'
 
 ## About Mock
 

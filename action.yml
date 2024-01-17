@@ -15,6 +15,13 @@ inputs:
   src:
     description: Path (file or dir) mapped to the rpmbuild/SOURCES directory
     required: false
+  cache:
+    description: Enable chroot environment caching
+    required: false
+  image:
+    description: Container image for Mock execution
+    required: true
+    default: 'fedora:latest'
   result-dir:
     description: Target path for writing build artifacts
     required: true
@@ -31,6 +38,7 @@ runs:
       run: |
         touch /tmp/mock-container-args
         mkdir -p ${{ inputs.result-dir }}
+        mkdir -p /tmp/cache/mock
       shell: bash
 
     - id: map-source
@@ -50,14 +58,64 @@ runs:
         echo -n "$arg" > /tmp/mock-container-args
       shell: bash
 
-    - id: create-container
-      run: podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out fedora:latest > action.cid
+    - id: restore-chroot
+      if: inputs.cache == 'true'
+      uses: actions/cache/restore@v3
+      with:
+        path: /tmp/cache/mock
+        key: chroot-${{ inputs.chroot }}-${{ hashFiles(inputs.spec) }}
+
+    - id: restore-image
+      if: inputs.cache == 'true'
+      uses: actions/cache/restore@v3
+      with:
+        path: /tmp/cache/image.tar.gz
+        key: image-${{ hashFiles(inputs.spec) }}-${{ inputs.image }}
+
+    - id: load-image
+      if: inputs.cache == 'true' && steps.restore-image.outputs.cache-hit == 'true'
+      run: |
+        podman load --input /tmp/cache/image.tar.gz
+        echo "${{ hashFiles(inputs.spec) }}-${{ inputs.image }}" > action.iid
       shell: bash
 
-    - id: init-mock-env
+    - id: create-container
+      run: |
+        iid=$(cat action.iid || echo "${{ inputs.image }}")
+        podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out -v /tmp/cache/mock:/var/cache/mock $iid > action.cid
+      shell: bash
+
+    - id: install-mock
       run: |
         cid=$(cat action.cid)
-        podman exec $cid dnf install -y mock
+        mockver=$(podman exec $cid mock --version || true)
+        if [[ -z $mockver ]]; then
+          podman exec $cid dnf install -y mock
+          echo "completed=true" >> $GITHUB_OUTPUT
+        fi
+      shell: bash
+
+    - id: save-container
+      if: inputs.cache == 'true' && steps.install-mock.outputs.completed == 'true'
+      run: |
+        cid=$(cat action.cid)
+        iid="${{ hashFiles(inputs.spec) }}-${{ inputs.image }}"
+        podman commit $cid $iid
+        mkdir -p /tmp/mock
+        podman save $iid | gzip > /tmp/cache/image.tar.gz
+      shell: bash
+
+    - id: save-image
+      if: inputs.cache == 'true' && steps.restore-image.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v3
+      with:
+        path: /tmp/cache/image.tar.gz
+        key: ${{ steps.restore-image.outputs.cache-primary-key }}
+
+    - id: init-mock
+      if: inputs.cache != 'true' || steps.restore-chroot.outputs.cache-hit != 'true'
+      run: |
+        cid=$(cat action.cid)
         podman exec $cid mock -r ${{ inputs.chroot }} --init
       shell: bash
 
@@ -70,7 +128,7 @@ runs:
         done
       shell: bash
 
-    - id: copy-in-specs
+    - id: copy-in-spec
       run: |
         cid=$(cat action.cid)
         spec=$(basename ${{ inputs.spec }})
@@ -83,10 +141,12 @@ runs:
         cid=$(cat action.cid)
         spec=$(basename ${{ inputs.spec }})
         podman exec $cid mock -r ${{ inputs.chroot }} --shell rpmbuild -bs /builddir/build/SPECS/$spec
-      shell: bash
-
-    - id: copy-out
-      run: |
-        cid=$(cat action.cid)
         podman exec $cid mock -r ${{ inputs.chroot }} --copyout /builddir/build/SRPMS/* /out
       shell: bash
+
+    - id: save-chroot
+      if: inputs.cache == 'true' && steps.restore-chroot.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v3
+      with:
+        path: /tmp/cache/mock
+        key: ${{ steps.restore-chroot.outputs.cache-primary-key }}
