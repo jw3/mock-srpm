@@ -12,7 +12,7 @@ inputs:
   spec:
     description: Path to spec file
     required: true
-  src:
+  sources:
     description: Path (file or dir) mapped to the rpmbuild/SOURCES directory
     required: false
   cache:
@@ -42,9 +42,9 @@ runs:
       shell: bash
 
     - id: map-source
-      if: inputs.src != null
+      if: inputs.sources != null
       run: |
-        src="${{ inputs.src }}"
+        src="${{ inputs.sources }}"
         if [[ "$src" != /* ]]; then src="${{ github.workspace }}/$src"; fi 
         if [[ -d ${src} ]]; then
           arg="-v $src:/in:ro"
@@ -120,7 +120,7 @@ runs:
       shell: bash
 
     - id: copy-in-sources
-      if: inputs.src != null
+      if: inputs.sources != null
       run: |
         cid=$(cat action.cid)
         for f in $(podman exec $cid ls /in); do
