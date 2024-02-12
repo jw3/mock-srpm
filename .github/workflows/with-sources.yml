@@ -28,7 +28,7 @@ jobs:
           spec: test/with-sources/withsources.spec
           sources: test/with-sources/
       - name: Build rpm
-        uses: jw3/mock-rpm@v0
+        uses: jw3/mock-rpm@v1
         with:
           chroot: fedora-39-x86_64
           srpm: withsources-*.src.rpm
@@ -57,7 +57,7 @@ jobs:
           spec: test/with-sources/withsources.spec
           sources: test/with-sources/withsources.tar.gz
       - name: Build rpm
-        uses: jw3/mock-rpm@v0
+        uses: jw3/mock-rpm@v1
         with:
           chroot: fedora-39-x86_64
           srpm: withsources-*.src.rpm
