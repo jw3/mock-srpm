@@ -149,6 +149,8 @@ runs:
     - id: fetch-remote-sources
       if: inputs.fetch-sources == 'true'
       run: |
+        cat /tmp/$spec
+        
         cid=$(cat action.cid)
         mkdir /tmp/fetch
         podman exec $cid spectool -g -C /tmp/fetch /tmp/$spec
