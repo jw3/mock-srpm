@@ -150,7 +150,7 @@ runs:
       if: inputs.fetch-sources == 'true'
       run: |
         cid=$(cat action.cid)
-        podman exec $cid spectool -g -C /builddir/build/SOURCES /builddir/build/SPECS/$spec
+        podman exec $cid spectool -g -C /builddir/build/SOURCES /tmp/$spec
       shell: bash
 
     - id: build
