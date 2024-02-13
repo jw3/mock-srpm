@@ -16,7 +16,7 @@ inputs:
     description: Path (file or dir) mapped to the rpmbuild/SOURCES directory
     required: false
   fetch-sources:
-    description: Use spectool to fetch remote sources
+    description: Use spectool to fetch remote SourceX entries
     required: false
   cache:
     description: Enable chroot environment caching
