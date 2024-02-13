@@ -152,7 +152,6 @@ runs:
         cid=$(cat action.cid)
         spec=$(basename ${{ inputs.spec }})
         podman exec $cid spectool -g -C /tmp/fetch /tmp/$spec
-        podman exec $cid du -h /tmp/fetch/*
         for f in $(podman exec $cid ls /tmp/fetch); do
           podman exec $cid mock -r ${{ inputs.chroot }} --copyin /tmp/fetch/$f /builddir/build/SOURCES
         done
