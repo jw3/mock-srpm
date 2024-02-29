@@ -28,7 +28,7 @@ runs:
   using: composite
   steps:
     - id: install-podman
-      run: sudo apt install -y podman
+      run: sudo dnf install -y podman
       shell: bash
 
     - id: prep-fs
